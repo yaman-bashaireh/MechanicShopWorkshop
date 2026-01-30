@@ -28,11 +28,11 @@ public class CreateWorkOrderCommandHandlerTests(WebAppFactory factory)
         var repairTask = RepairTaskFactory.CreateRepairTask().Value;
         var employee = EmployeeFactory.CreateEmployee().Value;
 
-        await _context.Customers.AddAsync(customer);
-        await _context.Vehicles.AddAsync(vehicle);
-        await _context.RepairTasks.AddAsync(repairTask);
-        await _context.Employees.AddAsync(employee);
-        await _context.SaveChangesAsync(default);
+        await _context.Customers.AddAsync(customer, TestContext.Current.CancellationToken);
+        await _context.Vehicles.AddAsync(vehicle, TestContext.Current.CancellationToken);
+        await _context.RepairTasks.AddAsync(repairTask, TestContext.Current.CancellationToken);
+        await _context.Employees.AddAsync(employee, TestContext.Current.CancellationToken);
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var scheduledAt = DateTimeOffset.UtcNow.Date
             .AddDays(1)
@@ -46,7 +46,7 @@ public class CreateWorkOrderCommandHandlerTests(WebAppFactory factory)
             LaborId: employee.Id);
 
         // Act
-        var result = await _mediator.Send(command);
+        var result = await _mediator.Send(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -65,10 +65,10 @@ public class CreateWorkOrderCommandHandlerTests(WebAppFactory factory)
         var vehicle = customer.Vehicles.First();
         var employee = EmployeeFactory.CreateEmployee().Value;
 
-        await _context.Customers.AddAsync(customer);
-        await _context.Vehicles.AddAsync(vehicle);
-        await _context.Employees.AddAsync(employee);
-        await _context.SaveChangesAsync(default);
+        await _context.Customers.AddAsync(customer, TestContext.Current.CancellationToken);
+        await _context.Vehicles.AddAsync(vehicle, TestContext.Current.CancellationToken);
+        await _context.Employees.AddAsync(employee, TestContext.Current.CancellationToken);
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var fakeRepairTaskId = Guid.NewGuid();
 
@@ -84,7 +84,7 @@ public class CreateWorkOrderCommandHandlerTests(WebAppFactory factory)
             LaborId: employee.Id);
 
         // Act
-        var result = await _mediator.Send(command);
+        var result = await _mediator.Send(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsError);
@@ -98,18 +98,18 @@ public class CreateWorkOrderCommandHandlerTests(WebAppFactory factory)
         var repairTask = RepairTaskFactory.CreateRepairTask(repairDurationInMinutes: RepairDurationInMinutes.Min60).Value;
         var employee = EmployeeFactory.CreateEmployee().Value;
 
-        await _context.Customers.AddAsync(customer);
-        await _context.Vehicles.AddAsync(vehicle);
-        await _context.RepairTasks.AddAsync(repairTask);
-        await _context.Employees.AddAsync(employee);
-        await _context.SaveChangesAsync(default);
+        await _context.Customers.AddAsync(customer, TestContext.Current.CancellationToken);
+        await _context.Vehicles.AddAsync(vehicle, TestContext.Current.CancellationToken);
+        await _context.RepairTasks.AddAsync(repairTask, TestContext.Current.CancellationToken);
+        await _context.Employees.AddAsync(employee, TestContext.Current.CancellationToken);
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var scheduledAt = DateTimeOffset.UtcNow.Date
              .AddDays(1)
              .AddHours(4);
 
         var command = new CreateWorkOrderCommand(Spot.B, vehicle.Id, scheduledAt, [repairTask.Id], employee.Id);
-        var result = await _mediator.Send(command);
+        var result = await _mediator.Send(command, TestContext.Current.CancellationToken);
 
         Assert.True(result.IsError);
     }
@@ -122,18 +122,18 @@ public class CreateWorkOrderCommandHandlerTests(WebAppFactory factory)
         var repairTask = RepairTaskFactory.CreateRepairTask(repairDurationInMinutes: RepairDurationInMinutes.Min15).Value;
         var employee = EmployeeFactory.CreateEmployee().Value;
 
-        await _context.Customers.AddAsync(customer);
-        await _context.Vehicles.AddAsync(vehicle);
-        await _context.RepairTasks.AddAsync(repairTask);
-        await _context.Employees.AddAsync(employee);
-        await _context.SaveChangesAsync(default);
+        await _context.Customers.AddAsync(customer, TestContext.Current.CancellationToken);
+        await _context.Vehicles.AddAsync(vehicle, TestContext.Current.CancellationToken);
+        await _context.RepairTasks.AddAsync(repairTask, TestContext.Current.CancellationToken);
+        await _context.Employees.AddAsync(employee, TestContext.Current.CancellationToken);
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var scheduledAt = DateTimeOffset.UtcNow.Date
          .AddDays(1)
          .AddHours(12);
 
         var command = new CreateWorkOrderCommand(Spot.A, vehicle.Id, scheduledAt, [repairTask.Id], employee.Id);
-        var result = await _mediator.Send(command);
+        var result = await _mediator.Send(command, TestContext.Current.CancellationToken);
 
         Assert.True(result.IsError);
         Assert.Contains(result.Errors, e => e.Code == "WorkOrder_TooShort");
@@ -145,16 +145,16 @@ public class CreateWorkOrderCommandHandlerTests(WebAppFactory factory)
         var repairTask = RepairTaskFactory.CreateRepairTask(repairDurationInMinutes: RepairDurationInMinutes.Min60).Value;
         var employee = EmployeeFactory.CreateEmployee().Value;
 
-        await _context.RepairTasks.AddAsync(repairTask);
-        await _context.Employees.AddAsync(employee);
-        await _context.SaveChangesAsync(default);
+        await _context.RepairTasks.AddAsync(repairTask, TestContext.Current.CancellationToken);
+        await _context.Employees.AddAsync(employee, TestContext.Current.CancellationToken);
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var scheduledAt = DateTimeOffset.UtcNow.Date
               .AddDays(1)
               .AddHours(13);
 
         var command = new CreateWorkOrderCommand(Spot.C, Guid.NewGuid(), scheduledAt, [repairTask.Id], employee.Id);
-        var result = await _mediator.Send(command);
+        var result = await _mediator.Send(command, TestContext.Current.CancellationToken);
 
         Assert.True(result.IsError);
     }
@@ -166,17 +166,17 @@ public class CreateWorkOrderCommandHandlerTests(WebAppFactory factory)
         var vehicle = customer.Vehicles.First();
         var repairTask = RepairTaskFactory.CreateRepairTask(repairDurationInMinutes: RepairDurationInMinutes.Min60).Value;
 
-        await _context.Customers.AddAsync(customer);
-        await _context.Vehicles.AddAsync(vehicle);
-        await _context.RepairTasks.AddAsync(repairTask);
-        await _context.SaveChangesAsync(default);
+        await _context.Customers.AddAsync(customer, TestContext.Current.CancellationToken);
+        await _context.Vehicles.AddAsync(vehicle, TestContext.Current.CancellationToken);
+        await _context.RepairTasks.AddAsync(repairTask, TestContext.Current.CancellationToken);
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var scheduledAt = DateTimeOffset.UtcNow.Date
              .AddDays(1)
              .AddHours(14);
 
         var command = new CreateWorkOrderCommand(Spot.C, vehicle.Id, scheduledAt, [repairTask.Id], Guid.NewGuid());
-        var result = await _mediator.Send(command);
+        var result = await _mediator.Send(command, TestContext.Current.CancellationToken);
 
         Assert.True(result.IsError);
     }
@@ -190,12 +190,12 @@ public class CreateWorkOrderCommandHandlerTests(WebAppFactory factory)
         var employee1 = EmployeeFactory.CreateEmployee().Value;
         var employee2 = EmployeeFactory.CreateEmployee().Value;
 
-        await _context.Customers.AddAsync(customer);
-        await _context.Vehicles.AddAsync(vehicle);
-        await _context.RepairTasks.AddAsync(repairTask);
-        await _context.Employees.AddAsync(employee1);
-        await _context.Employees.AddAsync(employee2);
-        await _context.SaveChangesAsync(default);
+        await _context.Customers.AddAsync(customer, TestContext.Current.CancellationToken);
+        await _context.Vehicles.AddAsync(vehicle, TestContext.Current.CancellationToken);
+        await _context.RepairTasks.AddAsync(repairTask, TestContext.Current.CancellationToken);
+        await _context.Employees.AddAsync(employee1, TestContext.Current.CancellationToken);
+        await _context.Employees.AddAsync(employee2, TestContext.Current.CancellationToken);
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var scheduledAt = DateTimeOffset.UtcNow.Date
            .AddDays(1)
@@ -204,8 +204,8 @@ public class CreateWorkOrderCommandHandlerTests(WebAppFactory factory)
         var command1 = new CreateWorkOrderCommand(Spot.A, vehicle.Id, scheduledAt, [repairTask.Id], employee1.Id);
         var command2 = new CreateWorkOrderCommand(Spot.B, vehicle.Id, scheduledAt, [repairTask.Id], employee2.Id);
 
-        await _mediator.Send(command1);
-        var result = await _mediator.Send(command2);
+        await _mediator.Send(command1, TestContext.Current.CancellationToken);
+        var result = await _mediator.Send(command2, TestContext.Current.CancellationToken);
 
         Assert.True(result.IsError);
         Assert.Equal("Vehicle_Overlapping_WorkOrders", result.TopError.Code);
@@ -222,13 +222,13 @@ public class CreateWorkOrderCommandHandlerTests(WebAppFactory factory)
         var repairTask = RepairTaskFactory.CreateRepairTask(repairDurationInMinutes: RepairDurationInMinutes.Min60).Value;
         var employee = EmployeeFactory.CreateEmployee().Value;
 
-        await _context.Customers.AddAsync(customer1);
-        await _context.Customers.AddAsync(customer2);
-        await _context.Vehicles.AddAsync(vehicle1);
-        await _context.Vehicles.AddAsync(vehicle2);
-        await _context.RepairTasks.AddAsync(repairTask);
-        await _context.Employees.AddAsync(employee);
-        await _context.SaveChangesAsync(default);
+        await _context.Customers.AddAsync(customer1, TestContext.Current.CancellationToken);
+        await _context.Customers.AddAsync(customer2, TestContext.Current.CancellationToken);
+        await _context.Vehicles.AddAsync(vehicle1, TestContext.Current.CancellationToken);
+        await _context.Vehicles.AddAsync(vehicle2, TestContext.Current.CancellationToken);
+        await _context.RepairTasks.AddAsync(repairTask, TestContext.Current.CancellationToken);
+        await _context.Employees.AddAsync(employee, TestContext.Current.CancellationToken);
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var scheduledAt = DateTimeOffset.UtcNow.Date
                   .AddDays(1)
@@ -237,8 +237,8 @@ public class CreateWorkOrderCommandHandlerTests(WebAppFactory factory)
         var command1 = new CreateWorkOrderCommand(Spot.A, vehicle1.Id, scheduledAt, [repairTask.Id], employee.Id);
         var command2 = new CreateWorkOrderCommand(Spot.B, vehicle2.Id, scheduledAt, [repairTask.Id], employee.Id);
 
-        await _mediator.Send(command1);
-        var result = await _mediator.Send(command2);
+        await _mediator.Send(command1, TestContext.Current.CancellationToken);
+        var result = await _mediator.Send(command2, TestContext.Current.CancellationToken);
 
         Assert.True(result.IsError);
         Assert.Equal("Labor_Occupied", result.TopError.Code);
@@ -256,21 +256,21 @@ public class CreateWorkOrderCommandHandlerTests(WebAppFactory factory)
         var employee1 = EmployeeFactory.CreateEmployee().Value;
         var employee2 = EmployeeFactory.CreateEmployee().Value;
 
-        await _context.Customers.AddAsync(customer);
-        await _context.Vehicles.AddAsync(vehicle1);
-        await _context.Vehicles.AddAsync(vehicle2);
-        await _context.RepairTasks.AddAsync(repairTask);
-        await _context.Employees.AddAsync(employee1);
-        await _context.Employees.AddAsync(employee2);
-        await _context.SaveChangesAsync(default);
+        await _context.Customers.AddAsync(customer, TestContext.Current.CancellationToken);
+        await _context.Vehicles.AddAsync(vehicle1, TestContext.Current.CancellationToken);
+        await _context.Vehicles.AddAsync(vehicle2, TestContext.Current.CancellationToken);
+        await _context.RepairTasks.AddAsync(repairTask, TestContext.Current.CancellationToken);
+        await _context.Employees.AddAsync(employee1, TestContext.Current.CancellationToken);
+        await _context.Employees.AddAsync(employee2, TestContext.Current.CancellationToken);
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var scheduledAt = DateTimeOffset.UtcNow.Date.AddDays(1).AddHours(17);
 
         var command1 = new CreateWorkOrderCommand(Spot.A, vehicle1.Id, scheduledAt, [repairTask.Id], employee1.Id);
         var command2 = new CreateWorkOrderCommand(Spot.A, vehicle2.Id, scheduledAt, [repairTask.Id], employee2.Id);
 
-        await _mediator.Send(command1);
-        var result = await _mediator.Send(command2);
+        await _mediator.Send(command1, TestContext.Current.CancellationToken);
+        var result = await _mediator.Send(command2, TestContext.Current.CancellationToken);
 
         Assert.True(result.IsError);
         Assert.Equal("MechanicShop_Spot_Full", result.TopError.Code);

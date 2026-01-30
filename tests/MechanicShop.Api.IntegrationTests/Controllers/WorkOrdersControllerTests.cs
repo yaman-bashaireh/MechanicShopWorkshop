@@ -28,14 +28,12 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var response = await _client.GetAsync(
             "/api/v1.0/workorders?page=1&pageSize=10",
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var result = await response.Content.ReadFromJsonAsync<PaginatedList<WorkOrderListItemDto>>(
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
         Assert.NotNull(result);
         Assert.NotNull(result!.Items);
         Assert.Equal(1, result.PageNumber);
@@ -51,8 +49,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
     public async Task GetWorkOrders_WithInvalidPagination_ShouldReturnBadRequest(
         int page,
         int pageSize,
-        string expectedError
-    )
+        string expectedError)
     {
         var token = await _client.GenerateTokenAsync(TestUsers.Manager);
 
@@ -60,14 +57,12 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var response = await _client.GetAsync(
             $"/api/v1.0/workorders?page={page}&pageSize={pageSize}",
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
         var content = await response.Content.ReadAsStringAsync(
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Contains(expectedError, content);
     }
@@ -92,14 +87,12 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var response = await _client.GetAsync(
             $"/api/v1.0/workorders?{queryString}",
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var result = await response.Content.ReadFromJsonAsync<PaginatedList<WorkOrderListItemDto>>(
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
     }
@@ -109,8 +102,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
     {
         var response = await _client.GetAsync(
             "/api/v1.0/workorders?page=1&pageSize=10",
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -128,8 +120,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             .WithRepairTasks(
                 await _context
                     .RepairTasks.Take(1)
-                    .ToListAsync(TestContext.Current.CancellationToken)
-            )
+                    .ToListAsync(TestContext.Current.CancellationToken))
             .WithVehicle(_context.Vehicles.FirstOrDefault()!.Id)
             .WithLabor(TestUsers.Labor01.Id)
             .Build();
@@ -142,14 +133,12 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         {
             var response = await _client.GetAsync(
                 $"/api/v1.0/workorders/{workOrder.Id}",
-                TestContext.Current.CancellationToken
-            );
+                TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var result = await response.Content.ReadFromJsonAsync<WorkOrderDto>(
-                TestContext.Current.CancellationToken
-            );
+                TestContext.Current.CancellationToken);
 
             Assert.NotNull(result);
             Assert.Equal(workOrder.Id, result!.WorkOrderId);
@@ -173,8 +162,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var response = await _client.GetAsync(
             $"/api/v1.0/workorders/{nonExistentId}",
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -186,8 +174,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var response = await _client.GetAsync(
             $"/api/v1.0/workorders/{workOrderId}",
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -223,12 +210,10 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             var response = await _client.PostAsJsonAsync(
                 "/api/v1.0/workorders",
                 request,
-                TestContext.Current.CancellationToken
-            );
+                TestContext.Current.CancellationToken);
 
             dto = await response.Content.ReadFromJsonAsync<WorkOrderDto>(
-                TestContext.Current.CancellationToken
-            );
+                TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
@@ -262,8 +247,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         var response = await _client.PostAsJsonAsync(
             "/api/v1.0/workorders",
             request,
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -287,8 +271,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         var response = await _client.PostAsJsonAsync(
             "/api/v1.0/workorders",
             request,
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -306,8 +289,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             .WithRepairTasks(
                 await _context
                     .RepairTasks.Take(1)
-                    .ToListAsync(TestContext.Current.CancellationToken)
-            )
+                    .ToListAsync(TestContext.Current.CancellationToken))
             .WithVehicle(_context.Vehicles.FirstOrDefault()!.Id)
             .WithLabor(TestUsers.Labor01.Id)
             .Build();
@@ -327,8 +309,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             var response = await _client.PutAsJsonAsync(
                 $"/api/v1.0/workorders/{workOrder.Id}/relocation",
                 request,
-                TestContext.Current.CancellationToken
-            );
+                TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
@@ -358,8 +339,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         var response = await _client.PutAsJsonAsync(
             $"/api/v1.0/workorders/{nonExistentId}/relocation",
             request,
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -377,8 +357,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             .WithRepairTasks(
                 await _context
                     .RepairTasks.Take(1)
-                    .ToListAsync(TestContext.Current.CancellationToken)
-            )
+                    .ToListAsync(TestContext.Current.CancellationToken))
             .WithVehicle(_context.Vehicles.FirstOrDefault()!.Id)
             .WithLabor(TestUsers.Labor01.Id)
             .Build();
@@ -394,8 +373,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             var response = await _client.PutAsJsonAsync(
                 $"/api/v1.0/workorders/{workOrder.Id}/labor",
                 request,
-                TestContext.Current.CancellationToken
-            );
+                TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
@@ -419,8 +397,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         var response = await _client.PutAsJsonAsync(
             $"/api/v1.0/workorders/{Guid.NewGuid()}/labor",
             request,
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -438,13 +415,11 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             .WithRepairTasks(
                 await _context
                     .RepairTasks.Take(1)
-                    .ToListAsync(TestContext.Current.CancellationToken)
-            )
+                    .ToListAsync(TestContext.Current.CancellationToken))
             .WithVehicle(_context.Vehicles.FirstOrDefault()!.Id)
             .WithTimeSlot(
                 DateTimeOffset.UtcNow.AddMinutes(-3),
-                DateTimeOffset.UtcNow.AddMinutes(30)
-            )
+                DateTimeOffset.UtcNow.AddMinutes(30))
             .WithLabor(TestUsers.Labor01.Id)
             .Build();
 
@@ -462,8 +437,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             var response = await _client.PutAsJsonAsync(
                 $"/api/v1.0/workorders/{workOrder.Id}/state",
                 request,
-                TestContext.Current.CancellationToken
-            );
+                TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
@@ -488,12 +462,10 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             .WithRepairTasks(
                 await _context
                     .RepairTasks.Take(1)
-                    .ToListAsync(TestContext.Current.CancellationToken)
-            )
+                    .ToListAsync(TestContext.Current.CancellationToken))
             .WithTimeSlot(
                 DateTimeOffset.UtcNow.AddMinutes(-3),
-                DateTimeOffset.UtcNow.AddMinutes(30)
-            )
+                DateTimeOffset.UtcNow.AddMinutes(30))
             .WithLabor(TestUsers.Labor01.Id)
             .WithVehicle(_context.Vehicles.FirstOrDefault()!.Id)
             .Build();
@@ -512,8 +484,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             var response = await _client.PutAsJsonAsync(
                 $"/api/v1.0/workorders/{workOrder.Id}/state",
                 request,
-                TestContext.Current.CancellationToken
-            );
+                TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
@@ -538,8 +509,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             .WithRepairTasks(
                 await _context
                     .RepairTasks.Take(1)
-                    .ToListAsync(TestContext.Current.CancellationToken)
-            )
+                    .ToListAsync(TestContext.Current.CancellationToken))
             .WithVehicle(_context.Vehicles.FirstOrDefault()!.Id)
             .WithLabor(TestUsers.Labor01.Id)
             .Build();
@@ -558,8 +528,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             var response = await _client.PutAsJsonAsync(
                 $"/api/v1.0/workorders/{workOrder.Id}/state",
                 request,
-                TestContext.Current.CancellationToken
-            );
+                TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
@@ -584,8 +553,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             .WithRepairTasks(
                 await _context
                     .RepairTasks.Take(1)
-                    .ToListAsync(TestContext.Current.CancellationToken)
-            )
+                    .ToListAsync(TestContext.Current.CancellationToken))
             .WithVehicle(_context.Vehicles.FirstOrDefault()!.Id)
             .WithLabor(TestUsers.Labor01.Id)
             .Build();
@@ -608,8 +576,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             var response = await _client.PutAsJsonAsync(
                 $"/api/v1.0/workorders/{workOrder.Id}/repair-task",
                 request,
-                TestContext.Current.CancellationToken
-            );
+                TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
@@ -635,8 +602,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         var response = await _client.PutAsJsonAsync(
             $"/api/v1.0/workorders/{workOrderId}/repair-task",
             request,
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -654,8 +620,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             .WithRepairTasks(
                 await _context
                     .RepairTasks.Take(1)
-                    .ToListAsync(TestContext.Current.CancellationToken)
-            )
+                    .ToListAsync(TestContext.Current.CancellationToken))
             .WithVehicle(_context.Vehicles.FirstOrDefault()!.Id)
             .WithLabor(TestUsers.Labor01.Id)
             .Build();
@@ -668,8 +633,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         {
             var response = await _client.DeleteAsync(
                 $"/api/v1.0/workorders/{workOrder.Id}",
-                TestContext.Current.CancellationToken
-            );
+                TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
@@ -692,8 +656,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var response = await _client.DeleteAsync(
             $"/api/v1.0/workorders/{nonExistentId}",
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -709,8 +672,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var response = await _client.DeleteAsync(
             $"/api/v1.0/workorders/{workOrderId}",
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -726,8 +688,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var request = new HttpRequestMessage(
             HttpMethod.Get,
-            $"/api/v1.0/workorders/schedule/{today:yyyy-MM-dd}"
-        );
+            $"/api/v1.0/workorders/schedule/{today:yyyy-MM-dd}");
 
         request.Headers.Add("X-TimeZone", "America/Montreal");
 
@@ -736,8 +697,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var result = await response.Content.ReadFromJsonAsync<ScheduleDto>(
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
     }
@@ -755,8 +715,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             .WithRepairTasks(
                 await _context
                     .RepairTasks.Take(1)
-                    .ToListAsync(TestContext.Current.CancellationToken)
-            )
+                    .ToListAsync(TestContext.Current.CancellationToken))
             .WithVehicle(_context.Vehicles.FirstOrDefault()!.Id)
             .WithLabor(TestUsers.Labor01.Id)
             .Build();
@@ -770,8 +729,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         {
             var request = new HttpRequestMessage(
                 HttpMethod.Get,
-                $"/api/v1.0/workorders/schedule/{today:yyyy-MM-dd}"
-            );
+                $"/api/v1.0/workorders/schedule/{today:yyyy-MM-dd}");
 
             request.Headers.Add("X-TimeZone", "America/Montreal");
 
@@ -780,8 +738,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var result = await response.Content.ReadFromJsonAsync<ScheduleDto>(
-                TestContext.Current.CancellationToken
-            );
+                TestContext.Current.CancellationToken);
 
             Assert.NotNull(result);
             Assert.NotNull(result.Spots);
@@ -807,8 +764,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         var response = await _client.PutAsJsonAsync(
             $"/api/v1.0/workorders/{nonExistentId}/labor",
             request,
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -822,8 +778,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         var response = await _client.PutAsJsonAsync(
             $"/api/v1.0/workorders/{workOrderId}/labor",
             request,
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -842,8 +797,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         var response = await _client.PutAsJsonAsync(
             $"/api/v1.0/workorders/{Guid.NewGuid()}/state",
             request,
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -859,8 +813,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         var response = await _client.PutAsJsonAsync(
             $"/api/v1.0/workorders/{Guid.NewGuid()}/state",
             request,
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -876,8 +829,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         var response = await _client.PutAsJsonAsync(
             $"/api/v1.0/workorders/{Guid.NewGuid()}/repair-task",
             request,
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -890,8 +842,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         var response = await _client.PutAsJsonAsync(
             $"/api/v1.0/workorders/{Guid.NewGuid()}/repair-task",
             request,
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -901,8 +852,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
     {
         var response = await _client.DeleteAsync(
             $"/api/v1.0/workorders/{Guid.NewGuid()}",
-            TestContext.Current.CancellationToken
-        );
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -914,8 +864,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var request = new HttpRequestMessage(
             HttpMethod.Get,
-            $"/api/v1.0/workorders/schedule/{today:yyyy-MM-dd}"
-        );
+            $"/api/v1.0/workorders/schedule/{today:yyyy-MM-dd}");
 
         request.Headers.Add("X-TimeZone", "America/Montreal");
 

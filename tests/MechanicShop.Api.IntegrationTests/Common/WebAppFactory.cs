@@ -19,7 +19,7 @@ public class WebAppFactory : WebApplicationFactory<IAssemblyMarker>, IAsyncLifet
 {
     private readonly MsSqlContainer _dbContainer =
         new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest")
-    .Build();
+        .Build();
 
     public AppHttpClient CreateAppHttpClient()
     {

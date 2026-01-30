@@ -1,12 +1,18 @@
 {
     "cSpell.words": [
+        "accessibilities",
         "Blazor",
         "Blazored",
         "buildtransitive",
         "contentfiles",
         "Dtos",
+        "ipascalcase",
+        "Mediat",
+        "pascalcase",
+        "Serilog",
         "Swashbuckle",
         "Testcontainers",
+        "tpascalcase",
         "workorders",
         "xunit"
     ]
