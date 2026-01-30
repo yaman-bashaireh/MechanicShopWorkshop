@@ -1,59 +1,30 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.OpenApi;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 namespace MechanicShop.Api.OpenApi.Transformers;
-
-internal sealed class BearerSecuritySchemeTransformer : IOpenApiDocumentTransformer, IOpenApiOperationTransformer
+internal sealed class BearerSecuritySchemeTransformer(IAuthenticationSchemeProvider authenticationSchemeProvider) : IOpenApiDocumentTransformer
 {
-    private const string SchemeId = JwtBearerDefaults.AuthenticationScheme;
-
-    public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
+    public async Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
     {
-        document.Components ??= new();
-        document.Components.SecuritySchemes ??= new Dictionary<string, OpenApiSecurityScheme>();
-
-        document.Components.SecuritySchemes[SchemeId] = new OpenApiSecurityScheme
+        var authenticationSchemes = await authenticationSchemeProvider.GetAllSchemesAsync();
+        if (authenticationSchemes.Any(authScheme => authScheme.Name == "Bearer"))
         {
-            Type = SecuritySchemeType.Http,
-            Scheme = "bearer",
-            BearerFormat = "JWT",
-            In = ParameterLocation.Header,
-            Description = "Enter JWT Bearer token",
-            Name = "Authorization",
-            Reference = new OpenApiReference
+            var securitySchemes = new Dictionary<string, IOpenApiSecurityScheme>
             {
-                Type = ReferenceType.SecurityScheme,
-                Id = SchemeId
-            }
-        };
-
-        return Task.CompletedTask;
-    }
-
-    public Task TransformAsync(OpenApiOperation operation, OpenApiOperationTransformerContext context, CancellationToken cancellationToken)
-    {
-        if (context.Description.ActionDescriptor.EndpointMetadata.OfType<IAuthorizeData>().Any())
-        {
-            operation.Security ??= [];
-
-            var key = new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference()
+                ["Bearer"] = new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer", // "bearer" refers to the header name here
+                    In = ParameterLocation.Header,
+                    BearerFormat = "Json Web Token"
+                }
             };
-
-            key.Reference.Type = ReferenceType.SecurityScheme;
-            key.Reference.Id = SchemeId;
-
-            var requirement = new OpenApiSecurityRequirement
-            {
-                { key, [] },
-            };
-
-            operation.Security.Add(requirement);
+            document.Components ??= new OpenApiComponents();
+            document.Components.SecuritySchemes = securitySchemes;
         }
-
-        return Task.CompletedTask;
     }
 }
+ 

@@ -4,8 +4,10 @@
         "Blazored",
         "buildtransitive",
         "contentfiles",
+        "Dtos",
         "Swashbuckle",
         "Testcontainers",
+        "workorders",
         "xunit"
     ]
 }

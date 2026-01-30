@@ -139,8 +139,7 @@ public static class DependencyInjection
                 options.AddDocumentTransformer<VersionInfoTransformer>();
 
                 // Security Scheme config
-                options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
-                options.AddOperationTransformer<BearerSecuritySchemeTransformer>();
+                options.AddDocumentTransformer<BearerSecuritySchemeTransformer>(); 
             });
         }
 
