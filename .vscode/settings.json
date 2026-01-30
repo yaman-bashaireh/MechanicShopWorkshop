@@ -1,6 +1,8 @@
 {
     "cSpell.words": [
         "accessibilities",
+        "Behaviour",
+        "Behaviours",
         "Blazor",
         "Blazored",
         "buildtransitive",
@@ -12,6 +14,7 @@
         "prerender",
         "Serilog",
         "Swashbuckle",
+        "Telememrty",
         "Testcontainers",
         "tpascalcase",
         "workorders",

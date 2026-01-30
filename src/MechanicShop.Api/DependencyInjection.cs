@@ -58,7 +58,7 @@ public static class DependencyInjection
     public static IServiceCollection AddAppOpenTelememrty(this IServiceCollection services)
     {
         services.AddOpenTelemetry()
-        .ConfigureResource(res => res.AddService("orderservice"))
+        .ConfigureResource(res => res.AddService("overservice"))
         .WithTracing(tracing =>
         {
             tracing.AddAspNetCoreInstrumentation().
@@ -139,7 +139,10 @@ public static class DependencyInjection
                 options.AddDocumentTransformer<VersionInfoTransformer>();
 
                 // Security Scheme config
-                options.AddDocumentTransformer<BearerSecuritySchemeTransformer>(); 
+                options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+
+                // Security Operation config
+                options.AddOperationTransformer<BearerSecurityOperationTransformer>();
             });
         }
 

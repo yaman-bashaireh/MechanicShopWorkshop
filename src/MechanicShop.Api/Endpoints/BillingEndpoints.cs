@@ -15,7 +15,6 @@ public static class BillingEndpoints
         var endpoints = app.MapGroup("/api/v{apiVersion:apiVersion}/invoices")
                .WithApiVersionSet(apiVersionSet)
                .HasApiVersion(1.0)
-               .WithOpenApi()
                .RequireAuthorization("ManagerOnly");
 
         endpoints.MapPost("/workorders/{workOrderId:guid}", IssueInvoice)

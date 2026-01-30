@@ -1,30 +1,29 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
 
-namespace MechanicShop.Api.OpenApi.Transformers;
-internal sealed class BearerSecuritySchemeTransformer(IAuthenticationSchemeProvider authenticationSchemeProvider) : IOpenApiDocumentTransformer
+internal sealed class BearerSecuritySchemeTransformer
+    : IOpenApiDocumentTransformer
 {
-    public async Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
+    public Task TransformAsync(
+        OpenApiDocument document,
+        OpenApiDocumentTransformerContext context,
+        CancellationToken cancellationToken)
     {
-        var authenticationSchemes = await authenticationSchemeProvider.GetAllSchemesAsync();
-        if (authenticationSchemes.Any(authScheme => authScheme.Name == "Bearer"))
-        {
-            var securitySchemes = new Dictionary<string, IOpenApiSecurityScheme>
+        document.Components ??= new OpenApiComponents();
+        document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+
+        document.Components.SecuritySchemes[JwtBearerDefaults.AuthenticationScheme] =
+            new OpenApiSecurityScheme
             {
-                ["Bearer"] = new OpenApiSecurityScheme
-                {
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "bearer", // "bearer" refers to the header name here
-                    In = ParameterLocation.Header,
-                    BearerFormat = "Json Web Token"
-                }
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Name = "Authorization",
+                Description = "JWT Authorization header using Bearer scheme."
             };
-            document.Components ??= new OpenApiComponents();
-            document.Components.SecuritySchemes = securitySchemes;
-        }
+
+        return Task.CompletedTask;
     }
 }
- 

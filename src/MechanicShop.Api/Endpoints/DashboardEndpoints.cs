@@ -12,9 +12,8 @@ public static class DashboardEndpoints
     public static void MapDashboardEndpoints(this IEndpointRouteBuilder app, ApiVersionSet versionSet)
     {
         var endpoints = app.MapGroup("/api/v{apiVersion:apiVersion}/dashboard")
-            .WithApiVersionSet(versionSet)
-            .WithOpenApi()
-            .RequireAuthorization("ManagerOnly");
+                           .WithApiVersionSet(versionSet)
+                           .RequireAuthorization("ManagerOnly");
 
         endpoints.MapGet("/stats", GetWorkOrderStats)
             .WithSummary("Get today's work order stats")

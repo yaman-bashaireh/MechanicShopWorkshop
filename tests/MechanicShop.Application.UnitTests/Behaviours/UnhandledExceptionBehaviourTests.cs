@@ -22,7 +22,7 @@ public class UnhandledExceptionBehaviourTests
         // Arrange
         var request = new DummyRequest();
         var next = Substitute.For<RequestHandlerDelegate<string>>();
-        next.Invoke().Returns("OK");
+        next.Invoke(TestContext.Current.CancellationToken).Returns("OK");
 
         // Act
         var result = await _sut.Handle(request, next, CancellationToken.None);
@@ -39,7 +39,7 @@ public class UnhandledExceptionBehaviourTests
         var exception = new InvalidOperationException("test failure");
 
         var next = Substitute.For<RequestHandlerDelegate<string>>();
-        next.Invoke().Returns<Task<string>>(_ => throw exception);
+        next.Invoke(TestContext.Current.CancellationToken).Returns<Task<string>>(_ => throw exception);
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>

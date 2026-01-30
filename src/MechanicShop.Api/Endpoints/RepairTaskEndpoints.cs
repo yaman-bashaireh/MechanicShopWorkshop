@@ -24,7 +24,6 @@ public static class RepairTaskEndpoints
         var endpoints = app.MapGroup("/api/v{apiVersion:apiVersion}/repair-tasks")
             .WithApiVersionSet(apiVersionSet)
             .HasApiVersion(1.0)
-            .WithOpenApi()
             .RequireAuthorization();
 
         endpoints.MapGet("/", GetRepairTasks)

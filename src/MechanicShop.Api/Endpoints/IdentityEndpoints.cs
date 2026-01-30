@@ -16,8 +16,8 @@ public static class IdentityEndpoints
 {
     public static void MapTokenEndpoints(this IEndpointRouteBuilder app, Asp.Versioning.Builder.ApiVersionSet apiVersionSet)
     {
-        var endpoints = app.MapGroup("/identity")
-            .WithOpenApi();
+        var endpoints = app.MapGroup("/identity");
+
         endpoints.MapPost("/token/generate", GenerateToken)
             .WithName("GenerateToken")
             .WithSummary("Generates a new JWT access and refresh token.")

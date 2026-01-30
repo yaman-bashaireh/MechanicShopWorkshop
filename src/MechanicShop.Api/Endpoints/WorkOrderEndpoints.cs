@@ -28,10 +28,9 @@ public static class WorkOrderEndpoints
     public static void MapWorkOrdersEndpoints(this IEndpointRouteBuilder app, ApiVersionSet apiVersionSet)
     {
         var endpoints = app.MapGroup("/api/v{apiVersion:apiVersion}/workorders")
-    .WithOpenApi()
-    .WithApiVersionSet(apiVersionSet)
-    .HasApiVersion(1.0)
-    .RequireAuthorization();
+        .WithApiVersionSet(apiVersionSet)
+        .HasApiVersion(1.0)
+        .RequireAuthorization();
 
         endpoints.MapGet("/", GetWorkOrders)
             .WithName("GetWorkOrders")

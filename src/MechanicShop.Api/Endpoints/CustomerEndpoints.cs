@@ -23,7 +23,6 @@ public static class CustomerEndpoints
         var endpoints = app.MapGroup("/api/v{apiVersion:apiVersion}/customers")
             .WithApiVersionSet(apiVersionSet)
             .HasApiVersion(1.0)
-            .WithOpenApi()
             .RequireAuthorization();
 
         endpoints.MapGet("/", GetCustomers)

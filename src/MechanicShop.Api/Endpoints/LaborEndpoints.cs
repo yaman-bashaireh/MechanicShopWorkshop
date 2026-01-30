@@ -16,7 +16,6 @@ public static class LaborEndpoints
         var endpoints = app.MapGroup("/api/v{apiVersion:apiVersion}/labors")
         .WithApiVersionSet(apiVersionSet)
         .HasApiVersion(1.0)
-        .WithOpenApi()
         .RequireAuthorization(policy => policy.RequireRole(Role.Manager.ToString()));
 
         endpoints.MapGet("/", GetLabors)

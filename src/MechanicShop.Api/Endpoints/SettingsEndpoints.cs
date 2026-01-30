@@ -11,7 +11,6 @@ public static class SettingsEndpoints
     public static void MapSettingsEndpoints(this IEndpointRouteBuilder app)
     {
         var endpoints = app.MapGroup("/api/settings")
-        .WithOpenApi()
         .RequireAuthorization();
 
         endpoints.MapGet("/operating-hours", GetOperateHours)
