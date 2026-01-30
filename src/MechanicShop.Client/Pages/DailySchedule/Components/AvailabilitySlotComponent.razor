@@ -1,55 +1,70 @@
 ﻿<div class="@GetDynamicClasses()" style="@GetDynamicStyle()" title="@Slot.RepairTasks">
-    <div class="d-flex flex-column justify-content-between h-100" style="font-size: 0.90rem;">
+    <div class="d-flex flex-column justify-content-between h-100 px-2 py-1">
         <div class="mt-1">
-            <span class="badge">@($"{Slot.StartAt:HH\\:mm} ➔ {Slot.EndAt:HH\\:mm}")</span>
+            <span class="slot-time text-success-emphasis fw-semibold">
+                @Slot.StartAt.ToString(@"hh\:mm") ➔ @Slot.EndAt.ToString(@"hh\:mm")
+            </span>
         </div>
-        <div class="d-flex justify-content-between align-items-center">
-            @if (Slot.IsOccupied)
-            {
-                <span class="badge text-sm">@Slot.Vehicle</span>
-                <span class="badge text-sm text-warning">@Slot.Labor?.Name</span>
-            }
-        </div>
+
+        @if (Slot.IsOccupied)
+        {
+            <div class="d-flex justify-content-between align-items-end gap-2">
+                <span class="slot-meta">@Slot.Vehicle</span>
+                <span class="slot-meta text-warning-emphasis">@Slot.Labor?.Name</span>
+            </div>
+        }
     </div>
 
+    @* Available click surface *@
     @if (!Slot.IsOccupied && Slot.IsAvailable)
     {
-        <div class="booking-overlay" @onclick="() => OnNewWorkOrderDialog.InvokeAsync(Slot)" style="cursor: pointer;">
-        </div>
+        <button type="button"
+                class="slot-cover"
+                title="Create Work Order"
+                @onclick="() => OnNewWorkOrderDialog.InvokeAsync(Slot)">
+        </button>
     }
+    @* Unavailable (non-clickable) surface *@
     else if (!Slot.IsOccupied && !Slot.IsAvailable)
     {
-        <div class="booking-overlay" style="cursor: not-allowed;"></div>
+        <div class="slot-cover slot-cover--disabled" title="Unavailable"></div>
     }
 
+    @* Occupied actions (only appears on hover, does NOT block layout) *@
     @if (Slot.IsOccupied)
     {
-        <div class="booking-overlay d-flex justify-content-end align-items-start">
-            <button class="btn btn-sm btn-secondary me-1 px-1 p-0 fs-6" title="State"
-                @onclick="@(() => OnEditWorkOrderStateDialog.InvokeAsync(Slot))">
+        <div class="slot-actions">
+            <button type="button" class="btn btn-light btn-sm slot-action-btn" title="State"
+                    @onclick="@(() => OnEditWorkOrderStateDialog.InvokeAsync(Slot))">
                 <i class="bi bi-activity"></i>
             </button>
 
             @if (!Slot.WorkOrderLocked)
             {
-                <button class="btn btn-sm btn-secondary me-1 px-1 p-0 fs-6" title="Relocate"
-                    @onclick="@(() => OnRelocateWorkOrderDialog.InvokeAsync(Slot))">
+                <button type="button" class="btn btn-light btn-sm slot-action-btn" title="Relocate"
+                        @onclick="@(() => OnRelocateWorkOrderDialog.InvokeAsync(Slot))">
                     <i class="bi bi-arrow-left-right"></i>
                 </button>
-                <button class="btn btn-sm btn-secondary me-1 px-1 p-0 fs-6" title="Labor"
-                    @onclick="@(() => OnEditWorkOrderLaborDialog.InvokeAsync(Slot))">
+
+                <button type="button" class="btn btn-light btn-sm slot-action-btn" title="Labor"
+                        @onclick="@(() => OnEditWorkOrderLaborDialog.InvokeAsync(Slot))">
                     <i class="bi bi-person-arms-up"></i>
                 </button>
-                <button class="btn btn-sm btn-secondary me-1 px-1 p-0 fs-6" title="Tasks"
-                    @onclick="@(() => OnEditWorkOrderRepairTasksDialog.InvokeAsync(Slot))">
+
+                <button type="button" class="btn btn-light btn-sm slot-action-btn" title="Tasks"
+                        @onclick="@(() => OnEditWorkOrderRepairTasksDialog.InvokeAsync(Slot))">
                     <i class="bi bi-wrench-adjustable-circle"></i>
                 </button>
-                <button class="btn btn-sm btn-secondary me-1 px-1 p-0 fs-6" title="Delete"
-                    @onclick="@(() => ConfirmDeleteAsync(Slot))">
+
+                <button type="button" class="btn btn-light btn-sm slot-action-btn text-danger" title="Delete"
+                        @onclick="@(() => ConfirmDeleteAsync(Slot))">
                     <i class="bi bi-trash-fill"></i>
                 </button>
             }
-            <NavLink href="@($"/workorder-details/{Slot.WorkOrderId}")" class="btn btn-sm btn-secondary me-1 px-1 p-0 fs-6">
+
+            <NavLink href="@($"/workorder-details/{Slot.WorkOrderId}")"
+                     class="btn btn-light btn-sm slot-action-btn"
+                     title="Details">
                 <i class="bi bi-info"></i>
             </NavLink>
         </div>
@@ -58,59 +73,50 @@
 
 @code {
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
-
     [Parameter] public AvailabilitySlotModel Slot { get; set; } = default!;
 
     [Parameter, EditorRequired] public EventCallback<AvailabilitySlotModel> OnNewWorkOrderDialog { get; set; } = default!;
-    [Parameter, EditorRequired]
-    public EventCallback<AvailabilitySlotModel> OnEditWorkOrderLaborDialog { get; set; } =
-    default!;
-    [Parameter, EditorRequired]
-    public EventCallback<AvailabilitySlotModel> OnRelocateWorkOrderDialog { get; set; } =
-    default!;
-    [Parameter, EditorRequired]
-    public EventCallback<AvailabilitySlotModel> OnEditWorkOrderRepairTasksDialog { get; set; } =
-    default!;
-    [Parameter, EditorRequired]
-    public EventCallback<AvailabilitySlotModel> OnEditWorkOrderStateDialog { get; set; } =
-    default!;
+    [Parameter, EditorRequired] public EventCallback<AvailabilitySlotModel> OnEditWorkOrderLaborDialog { get; set; } = default!;
+    [Parameter, EditorRequired] public EventCallback<AvailabilitySlotModel> OnRelocateWorkOrderDialog { get; set; } = default!;
+    [Parameter, EditorRequired] public EventCallback<AvailabilitySlotModel> OnEditWorkOrderRepairTasksDialog { get; set; } = default!;
+    [Parameter, EditorRequired] public EventCallback<AvailabilitySlotModel> OnEditWorkOrderStateDialog { get; set; } = default!;
     [Parameter] public EventCallback<Guid> OnDeleteWorkOrder { get; set; } = default!;
 
     public string GetDynamicClasses()
     {
-        var baseClasses = "booking-container w-100 fw-semibold bg-opacity-25 ";
+        var classes = "booking-container slot w-100";
 
-        baseClasses += Slot.IsOccupied ? "bg-secondary" : "bg-success";
+        if (Slot.IsOccupied)
+            classes += " bg-body-secondary border border-secondary-subtle text-body";
 
-        if (!Slot.IsOccupied && !Slot.IsAvailable)
-            baseClasses += " unavailable";
+        else if (Slot.IsAvailable)
+            classes += " bg-body-tertiary border border-secondary-subtle text-body";
 
-        return baseClasses;
+        else
+            classes += " bg-body-tertiary border border-secondary-subtle text-body-secondary slot-unavailable";
+
+        return classes;
     }
-
 
     public string GetDynamicStyle()
     {
         var duration = (Slot.EndAt - Slot.StartAt).TotalMinutes;
         var height = duration * 4;
-
-        return $"height: {height}px; outline: 2px solid #212529; outline-offset: -1px; padding:0!important;";
+        return $"height:{height}px;";
     }
+
     private async Task ConfirmDeleteAsync(AvailabilitySlotModel slot)
     {
         if (slot.WorkOrderId is not null)
         {
             var message = $"Delete WorkOrder?\n\n" +
-            $"⏰ Time: {slot.StartAt:hh\\:mm} ➔ {slot.EndAt:hh\\:mm}\n" +
-            $"🚗 Vehicle: {slot.Vehicle}\n" +
-            $"👷 Labor: {slot.Labor!.Name}\n";
+                          $"Time: {slot.StartAt:hh\\:mm} ➔ {slot.EndAt:hh\\:mm}\n" +
+                          $"Vehicle: {slot.Vehicle}\n" +
+                          $"Labor: {slot.Labor!.Name}\n";
 
             var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", message);
-
             if (confirmed)
-            {
                 await OnDeleteWorkOrder.InvokeAsync(slot.WorkOrderId.Value);
-            }
         }
     }
 }
