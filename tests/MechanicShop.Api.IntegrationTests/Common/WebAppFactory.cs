@@ -17,7 +17,8 @@ namespace MechanicShop.Api.IntegrationTests.Common;
 
 public class WebAppFactory : WebApplicationFactory<IAssemblyMarker>, IAsyncLifetime
 {
-    private readonly MsSqlContainer _dbContainer = new MsSqlBuilder()
+    private readonly MsSqlContainer _dbContainer =
+        new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest")
     .Build();
 
     public AppHttpClient CreateAppHttpClient()
@@ -39,17 +40,15 @@ public class WebAppFactory : WebApplicationFactory<IAssemblyMarker>, IAsyncLifet
         return serviceScope.ServiceProvider.GetRequiredService<IAppDbContext>();
     }
 
-    public Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
-        return _dbContainer.StartAsync()
-          .ContinueWith(async _ =>
-          {
-              using var scope = Services.CreateScope();
-              var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await _dbContainer.StartAsync();
 
-              context.WorkOrders.RemoveRange(context.WorkOrders);
-              await context.SaveChangesAsync();
-          }).Unwrap();
+        using var scope = Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        context.WorkOrders.RemoveRange(context.WorkOrders);
+        await context.SaveChangesAsync();
     }
 
     public new Task DisposeAsync() => _dbContainer.StopAsync();

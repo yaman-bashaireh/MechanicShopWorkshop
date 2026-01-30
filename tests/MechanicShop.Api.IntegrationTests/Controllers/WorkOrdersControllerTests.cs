@@ -29,11 +29,11 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         _client.SetAuthorizationHeader(token);
 
-        var response = await _client.GetAsync("/api/v1.0/workorders?page=1&pageSize=10");
+        var response = await _client.GetAsync("/api/v1.0/workorders?page=1&pageSize=10", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var result = await response.Content.ReadFromJsonAsync<PaginatedList<WorkOrderListItemDto>>();
+        var result = await response.Content.ReadFromJsonAsync<PaginatedList<WorkOrderListItemDto>>(TestContext.Current.CancellationToken);
         Assert.NotNull(result);
         Assert.NotNull(result!.Items);
         Assert.Equal(1, result.PageNumber);
@@ -52,7 +52,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         _client.SetAuthorizationHeader(token);
 
-        var response = await _client.GetAsync($"/api/v1.0/workorders?page={page}&pageSize={pageSize}");
+        var response = await _client.GetAsync($"/api/v1.0/workorders?page={page}&pageSize={pageSize}", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
@@ -82,7 +82,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var result = await response.Content.ReadFromJsonAsync<PaginatedList<WorkOrderListItemDto>>();
+        var result = await response.Content.ReadFromJsonAsync<PaginatedList<WorkOrderListItemDto>>(TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
     }
@@ -90,7 +90,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
     [Fact]
     public async Task GetWorkOrders_WithoutAuthentication_ShouldReturnUnauthorized()
     {
-        var response = await _client.GetAsync("/api/v1.0/workorders?page=1&pageSize=10");
+        var response = await _client.GetAsync("/api/v1.0/workorders?page=1&pageSize=10", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -104,7 +104,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var workOrder = WorkOrderTestDataBuilder.Create()
                    .ForToday()
-                   .WithRepairTasks(await _context.RepairTasks.Take(1).ToListAsync())
+                   .WithRepairTasks(await _context.RepairTasks.Take(1).ToListAsync(TestContext.Current.CancellationToken))
                    .WithVehicle(_context.Vehicles.FirstOrDefault()!.Id)
                    .WithLabor(TestUsers.Labor01.Id)
                    .Build();
@@ -115,11 +115,11 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         try
         {
-            var response = await _client.GetAsync($"/api/v1.0/workorders/{workOrder.Id}");
+            var response = await _client.GetAsync($"/api/v1.0/workorders/{workOrder.Id}", TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var result = await response.Content.ReadFromJsonAsync<WorkOrderDto>();
+            var result = await response.Content.ReadFromJsonAsync<WorkOrderDto>(TestContext.Current.CancellationToken);
 
             Assert.NotNull(result);
             Assert.Equal(workOrder.Id, result!.WorkOrderId);
@@ -141,7 +141,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var nonExistentId = Guid.NewGuid();
 
-        var response = await _client.GetAsync($"/api/v1.0/workorders/{nonExistentId}");
+        var response = await _client.GetAsync($"/api/v1.0/workorders/{nonExistentId}", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -151,7 +151,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
     {
         var workOrderId = Guid.NewGuid();
 
-        var response = await _client.GetAsync($"/api/v1.0/workorders/{workOrderId}");
+        var response = await _client.GetAsync($"/api/v1.0/workorders/{workOrderId}", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -164,7 +164,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         _client.SetAuthorizationHeader(token);
 
         var laborId = Guid.Parse(TestUsers.Labor01.Id);
-        var customer = (await _context.Customers.Include(c => c.Vehicles).FirstOrDefaultAsync())!;
+        var customer = (await _context.Customers.Include(c => c.Vehicles).FirstOrDefaultAsync(TestContext.Current.CancellationToken))!;
         var vehicle = customer.Vehicles.FirstOrDefault()!;
         var repairTaskIds = _context.RepairTasks.Select(rt => rt.Id).Take(2).ToList()!;
 
@@ -180,9 +180,9 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         WorkOrderDto? dto = null;
         try
         {
-            var response = await _client.PostAsJsonAsync("/api/v1.0/workorders", request);
+            var response = await _client.PostAsJsonAsync("/api/v1.0/workorders", request, TestContext.Current.CancellationToken);
 
-            dto = await response.Content.ReadFromJsonAsync<WorkOrderDto>();
+            dto = await response.Content.ReadFromJsonAsync<WorkOrderDto>(TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
@@ -213,7 +213,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             RepairTaskIds = []
         };
 
-        var response = await _client.PostAsJsonAsync("/api/v1.0/workorders", request);
+        var response = await _client.PostAsJsonAsync("/api/v1.0/workorders", request, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -234,7 +234,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             LaborId = Guid.NewGuid()
         };
 
-        var response = await _client.PostAsJsonAsync("/api/v1.0/workorders", request);
+        var response = await _client.PostAsJsonAsync("/api/v1.0/workorders", request, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -248,7 +248,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var workOrder = WorkOrderTestDataBuilder.Create()
                .ForToday()
-               .WithRepairTasks(await _context.RepairTasks.Take(1).ToListAsync())
+               .WithRepairTasks(await _context.RepairTasks.Take(1).ToListAsync(TestContext.Current.CancellationToken))
                .WithVehicle(_context.Vehicles.FirstOrDefault()!.Id)
                .WithLabor(TestUsers.Labor01.Id)
                .Build();
@@ -265,7 +265,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         try
         {
-            var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{workOrder.Id}/relocation", request);
+            var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{workOrder.Id}/relocation", request, TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
@@ -273,7 +273,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         {
             await _context.WorkOrders
                  .Where(w => w.Id == workOrder.Id)
-                 .ExecuteDeleteAsync();
+                 .ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         }
     }
 
@@ -292,7 +292,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             NewSpot = Contracts.Common.Spot.B
         };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{nonExistentId}/relocation", request);
+        var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{nonExistentId}/relocation", request, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -306,7 +306,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var workOrder = WorkOrderTestDataBuilder.Create()
                        .ForToday()
-                       .WithRepairTasks(await _context.RepairTasks.Take(1).ToListAsync())
+                       .WithRepairTasks(await _context.RepairTasks.Take(1).ToListAsync(TestContext.Current.CancellationToken))
                        .WithVehicle(_context.Vehicles.FirstOrDefault()!.Id)
                        .WithLabor(TestUsers.Labor01.Id)
                        .Build();
@@ -322,7 +322,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         try
         {
-            var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{workOrder.Id}/labor", request);
+            var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{workOrder.Id}/labor", request, TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
@@ -330,7 +330,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         {
             await _context.WorkOrders
                  .Where(w => w.Id == workOrder.Id)
-                 .ExecuteDeleteAsync();
+                 .ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         }
     }
 
@@ -346,7 +346,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             LaborId = Guid.Empty.ToString()
         };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{Guid.NewGuid()}/labor", request);
+        var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{Guid.NewGuid()}/labor", request, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -360,7 +360,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var workOrder = WorkOrderTestDataBuilder.Create()
                     .ForToday()
-                    .WithRepairTasks(await _context.RepairTasks.Take(1).ToListAsync())
+                    .WithRepairTasks(await _context.RepairTasks.Take(1).ToListAsync(TestContext.Current.CancellationToken))
                     .WithVehicle(_context.Vehicles.FirstOrDefault()!.Id)
                     .WithTimeSlot(DateTimeOffset.UtcNow.AddMinutes(-3), DateTimeOffset.UtcNow.AddMinutes(30))
                     .WithLabor(TestUsers.Labor01.Id)
@@ -377,7 +377,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
                 State = Contracts.Common.WorkOrderState.InProgress
             };
 
-            var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{workOrder.Id}/state", request);
+            var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{workOrder.Id}/state", request, TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
@@ -398,7 +398,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var workOrder = WorkOrderTestDataBuilder.Create()
           .ForToday()
-          .WithRepairTasks(await _context.RepairTasks.Take(1).ToListAsync())
+          .WithRepairTasks(await _context.RepairTasks.Take(1).ToListAsync(TestContext.Current.CancellationToken))
           .WithTimeSlot(DateTimeOffset.UtcNow.AddMinutes(-3), DateTimeOffset.UtcNow.AddMinutes(30))
           .WithLabor(TestUsers.Labor01.Id)
           .WithVehicle(_context.Vehicles.FirstOrDefault()!.Id)
@@ -415,7 +415,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
                 State = Contracts.Common.WorkOrderState.InProgress
             };
 
-            var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{workOrder.Id}/state", request);
+            var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{workOrder.Id}/state", request, TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
@@ -436,7 +436,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var workOrder = WorkOrderTestDataBuilder.Create()
          .ForToday()
-         .WithRepairTasks(await _context.RepairTasks.Take(1).ToListAsync())
+         .WithRepairTasks(await _context.RepairTasks.Take(1).ToListAsync(TestContext.Current.CancellationToken))
          .WithVehicle(_context.Vehicles.FirstOrDefault()!.Id)
          .WithLabor(TestUsers.Labor01.Id)
          .Build();
@@ -452,7 +452,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
                 State = Contracts.Common.WorkOrderState.InProgress
             };
 
-            var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{workOrder.Id}/state", request);
+            var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{workOrder.Id}/state", request, TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
@@ -460,7 +460,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         {
             await _context.WorkOrders
                  .Where(w => w.Id == workOrder.Id)
-                 .ExecuteDeleteAsync();
+                 .ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         }
     }
 
@@ -473,20 +473,20 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var workOrder = WorkOrderTestDataBuilder.Create()
           .ForToday()
-          .WithRepairTasks(await _context.RepairTasks.Take(1).ToListAsync())
+          .WithRepairTasks(await _context.RepairTasks.Take(1).ToListAsync(TestContext.Current.CancellationToken))
           .WithVehicle(_context.Vehicles.FirstOrDefault()!.Id)
           .WithLabor(TestUsers.Labor01.Id)
           .Build();
 
         _context.WorkOrders.Add(workOrder);
 
-        await _context.SaveChangesAsync(default);
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var assignedRepairTaskIds = workOrder.RepairTasks.Select(rt => rt.Id).ToHashSet();
 
         var newRepairTask = await _context.RepairTasks.AsNoTracking()
             .Where(rt => !assignedRepairTaskIds.Contains(rt.Id))
-            .FirstAsync();
+            .FirstAsync(TestContext.Current.CancellationToken);
 
         var request = new ModifyRepairTaskRequest
         {
@@ -495,7 +495,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         try
         {
-            var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{workOrder.Id}/repair-task", request);
+            var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{workOrder.Id}/repair-task", request, TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
@@ -503,7 +503,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         {
             await _context.WorkOrders
                  .Where(w => w.Id == workOrder.Id)
-                 .ExecuteDeleteAsync();
+                 .ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         }
     }
 
@@ -521,7 +521,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             RepairTaskIds = [Guid.NewGuid()]
         };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{workOrderId}/repair-task", request);
+        var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{workOrderId}/repair-task", request, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -535,7 +535,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var workOrder = WorkOrderTestDataBuilder.Create()
           .ForToday()
-          .WithRepairTasks(await _context.RepairTasks.Take(1).ToListAsync())
+          .WithRepairTasks(await _context.RepairTasks.Take(1).ToListAsync(TestContext.Current.CancellationToken))
           .WithVehicle(_context.Vehicles.FirstOrDefault()!.Id)
           .WithLabor(TestUsers.Labor01.Id)
           .Build();
@@ -546,7 +546,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         try
         {
-            var response = await _client.DeleteAsync($"/api/v1.0/workorders/{workOrder.Id}");
+            var response = await _client.DeleteAsync($"/api/v1.0/workorders/{workOrder.Id}", TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
@@ -567,7 +567,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var nonExistentId = Guid.NewGuid();
 
-        var response = await _client.DeleteAsync($"/api/v1.0/workorders/{nonExistentId}");
+        var response = await _client.DeleteAsync($"/api/v1.0/workorders/{nonExistentId}", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -581,7 +581,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var workOrderId = Guid.NewGuid();
 
-        var response = await _client.DeleteAsync($"/api/v1.0/workorders/{workOrderId}");
+        var response = await _client.DeleteAsync($"/api/v1.0/workorders/{workOrderId}", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -603,7 +603,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var result = await response.Content.ReadFromJsonAsync<ScheduleDto>();
+        var result = await response.Content.ReadFromJsonAsync<ScheduleDto>(TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
     }
@@ -617,7 +617,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var workOrder = WorkOrderTestDataBuilder.Create()
                        .ForToday()
-                       .WithRepairTasks(await _context.RepairTasks.Take(1).ToListAsync())
+                       .WithRepairTasks(await _context.RepairTasks.Take(1).ToListAsync(TestContext.Current.CancellationToken))
                        .WithVehicle(_context.Vehicles.FirstOrDefault()!.Id)
                        .WithLabor(TestUsers.Labor01.Id)
                        .Build();
@@ -637,7 +637,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var result = await response.Content.ReadFromJsonAsync<ScheduleDto>();
+            var result = await response.Content.ReadFromJsonAsync<ScheduleDto>(TestContext.Current.CancellationToken);
 
             Assert.NotNull(result);
             Assert.NotNull(result.Spots);
@@ -645,7 +645,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         finally
         {
             _context.WorkOrders.Remove(workOrder);
-            await _context.SaveChangesAsync(default);
+            await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
         }
     }
 
@@ -660,7 +660,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
 
         var nonExistentId = Guid.NewGuid();
 
-        var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{nonExistentId}/labor", request);
+        var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{nonExistentId}/labor", request, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -671,7 +671,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
         var request = new AssignLaborRequest { LaborId = TestUsers.Labor01.Id };
         var workOrderId = Guid.NewGuid();
 
-        var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{workOrderId}/labor", request);
+        var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{workOrderId}/labor", request, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -687,7 +687,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             State = Contracts.Common.WorkOrderState.InProgress
         };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{Guid.NewGuid()}/state", request);
+        var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{Guid.NewGuid()}/state", request, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -700,7 +700,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             State = Contracts.Common.WorkOrderState.InProgress
         };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{Guid.NewGuid()}/state", request);
+        var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{Guid.NewGuid()}/state", request, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -716,7 +716,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             RepairTaskIds = [Guid.NewGuid()]
         };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{Guid.NewGuid()}/repair-task", request);
+        var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{Guid.NewGuid()}/repair-task", request, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -729,7 +729,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
             RepairTaskIds = [Guid.NewGuid()]
         };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{Guid.NewGuid()}/repair-task", request);
+        var response = await _client.PutAsJsonAsync($"/api/v1.0/workorders/{Guid.NewGuid()}/repair-task", request, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -737,7 +737,7 @@ public class WorkOrdersControllerTests(WebAppFactory webAppFactory)
     [Fact]
     public async Task DeleteWorkOrder_WithoutAuthentication_ShouldReturnUnauthorized()
     {
-        var response = await _client.DeleteAsync($"/api/v1.0/workorders/{Guid.NewGuid()}");
+        var response = await _client.DeleteAsync($"/api/v1.0/workorders/{Guid.NewGuid()}", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
