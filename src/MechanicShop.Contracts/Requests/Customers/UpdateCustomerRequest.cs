@@ -22,7 +22,6 @@ public class UpdateCustomerRequest
     [EmailAddress(ErrorMessage = "Email is invalid.")]
     public string Email { get; set; } = string.Empty;
 
-    [ValidateComplexType]
     [MinLength(1, ErrorMessage = "At least one vehicle is required.")]
     public List<UpdateVehicleRequest> Vehicles { get; set; } = [];
 }

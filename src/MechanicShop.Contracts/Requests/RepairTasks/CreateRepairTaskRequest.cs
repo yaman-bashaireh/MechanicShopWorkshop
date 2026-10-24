@@ -17,6 +17,5 @@ public class CreateRepairTaskRequest
     public RepairDurationInMinutes? EstimatedDurationInMins { get; set; }
 
     [MinLength(1, ErrorMessage = "At least one part is required.")]
-    [ValidateComplexType]
     public List<CreateRepairTaskPartRequest> Parts { get; set; } = [];
 }

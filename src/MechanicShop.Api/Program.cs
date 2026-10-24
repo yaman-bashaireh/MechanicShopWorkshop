@@ -1,4 +1,3 @@
-using MechanicShop.Api.Components;
 using MechanicShop.Infrastructure.Data;
 using MechanicShop.Infrastructure.RealTime;
 
@@ -7,10 +6,6 @@ using Scalar.AspNetCore;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveWebAssemblyComponents();
 
 builder.Services
     .AddPresentation(builder.Configuration)
@@ -39,8 +34,6 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 
     await app.InitialiseDatabaseAsync();
-
-    app.UseWebAssemblyDebugging();
 }
 else
 {
@@ -50,14 +43,6 @@ else
 app.UseCoreMiddlewares(builder.Configuration);
 
 app.MapControllers();
-
-app.UseAntiforgery();
-
-app.MapStaticAssets();
-
-app.MapRazorComponents<App>().AllowAnonymous()
-    .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(MechanicShop.Client._Imports).Assembly);
 
 app.MapHub<WorkOrderHub>("/hubs/workorders");
 

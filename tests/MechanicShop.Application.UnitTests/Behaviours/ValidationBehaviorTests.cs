@@ -37,13 +37,16 @@ public class ValidationBehaviorTests
         var workOrderResponse = WorkOrderFactory.CreateWorkOrder().Value.ToDto();
 
         _mockValidator
-            .ValidateAsync(createWorkOrderCommand, Arg.Any<CancellationToken>())
+            .ValidateAsync(createWorkOrderCommand, TestContext.Current.CancellationToken)
             .Returns(new ValidationResult());
 
         _mockNextBehavior.Invoke(TestContext.Current.CancellationToken).Returns(workOrderResponse);
 
         // Act
-        var result = await _validationBehavior.Handle(createWorkOrderCommand, _mockNextBehavior, TestContext.Current.CancellationToken);
+        var result = await _validationBehavior.Handle(
+       createWorkOrderCommand,
+       _mockNextBehavior,
+       TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);
